@@ -48,6 +48,50 @@ class UnitTestTests: XCTestCase {
             }
         }
     }
+    
+    func testDownloadFail() {
+        let expectation = self.expectation(description: "\(#function)")
+        
+        let request = URLRequest(url: URL(string: "https://api.github.com/user")!)
+
+        downloader.download(request) { success, url, res, err in
+            print("url: \(String(describing: url?.absoluteString)), res: \(String(describing: res)), err: \(String(describing: err))")
+            if success {
+                XCTFail()
+            } else {
+                expectation.fulfill()
+            }
+        }
+        
+        self.waitForExpectations(timeout: 10) { error in
+            if let e = error {
+                print("\(e)")
+            }
+        }
+    }
+    
+    func testDownloadFailTwo() throws {
+        let expectation = self.expectation(description: "\(#function)")
+        
+        let request = URLRequest(url: URL(string: "https://api.github.com/users11111")!)
+        
+        downloader.download(request) { success, url, res, err in
+            print("url: \(String(describing: url?.absoluteString)), res: \(String(describing: res)), err: \(String(describing: err))")
+            if success {
+                XCTFail()
+            } else {
+                expectation.fulfill()
+            }
+        }
+        
+        
+        self.waitForExpectations(timeout: 10) { error in
+            if let e = error {
+                print("\(e)")
+            }
+        }
+
+    }
 
     func testRemovePreviousDownload() throws {
     
@@ -72,30 +116,6 @@ class UnitTestTests: XCTestCase {
                 print("\(e)")
             }
         }
-        
-    }
-    
-    func testFailDownload() throws {
-        let expectation = self.expectation(description: "\(#function)")
-        
-        let request = URLRequest(url: URL(string: "https://api.github.com/users11111")!)
-        
-        downloader.download(request) { success, url, res, err in
-            print("url: \(String(describing: url?.absoluteString)), res: \(String(describing: res)), err: \(String(describing: err))")
-            if success {
-                XCTFail()
-            } else {
-                expectation.fulfill()
-            }
-        }
-        
-        
-        self.waitForExpectations(timeout: 10) { error in
-            if let e = error {
-                print("\(e)")
-            }
-        }
-
     }
 
     func testPerformanceExample() throws {
