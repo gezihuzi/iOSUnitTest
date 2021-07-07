@@ -13,6 +13,7 @@ class DownloadHandler: NSObject {
     let session: URLSession = URLSession(configuration: .default)
     public func download(_ request: URLRequest, completionHandler: @escaping (_ success: Bool, URL?, URLResponse?, Error?) -> Void) {
         let task = session.downloadTask(with: request) { url, response, error in
+            // restful API success check
             let success = true
             completionHandler(success, url, response, error)
             print(response ?? "no response")
@@ -107,7 +108,9 @@ class UnitTestTests: XCTestCase {
         
         downloader.download(request) { success, url, res, err in
             print("url: \(String(describing: url?.absoluteString)), res: \(String(describing: res)), err: \(String(describing: err))")
-            expectation.fulfill()
+            DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(5)) {
+                expectation.fulfill()
+            }
         }
         
         
