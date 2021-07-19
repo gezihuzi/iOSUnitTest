@@ -11,14 +11,33 @@ import XCTest
 
 class DownloadHandler: NSObject {
     let session: URLSession = URLSession(configuration: .default)
+    private var downloadTask: URLSessionDownloadTask? = nil
+    
     public func download(_ request: URLRequest, completionHandler: @escaping (_ success: Bool, URL?, URLResponse?, Error?) -> Void) {
-        let task = session.downloadTask(with: request) { url, response, error in
+        let previousTask = downloadTask
+        previousTask?.cancel()
+        let previousTaskHash = previousTask?.hash
+        downloadTask = session.downloadTask(with: request) { [weak self] url, response, error in
             // restful API success check
-            let success = true
-            completionHandler(success, url, response, error)
-            print(response ?? "no response")
+            if let err = error as NSError? {
+                if err.code == NSURLErrorCancelled {
+                    print("user cancelled!")
+                }
+            } else {
+                var success = false
+                if let rsp = response as? HTTPURLResponse {
+                    success = (rsp.statusCode == 200)
+                }
+                if let pHash = previousTaskHash, let dHash = self?.downloadTask?.hash {
+                    if pHash == dHash {
+                        return
+                    }
+                }
+                completionHandler(success, url, response, error)
+                print(response ?? "no response")
+            }
         }
-        task.resume()
+        downloadTask?.resume()
     }
 }
 
